@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34301.259
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateTool", "UpdateTool\UpdateTool.csproj", "{A1EB711E-6553-433D-8F16-9A1C5CE75795}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupUpdateTool", "SetupUpdateTool\SetupUpdateTool.vdproj", "{FCB627FF-6B2B-4A9E-8765-0C9094316892}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1EB711E-6553-433D-8F16-9A1C5CE75795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1EB711E-6553-433D-8F16-9A1C5CE75795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1EB711E-6553-433D-8F16-9A1C5CE75795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1EB711E-6553-433D-8F16-9A1C5CE75795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCB627FF-6B2B-4A9E-8765-0C9094316892}.Debug|Any CPU.ActiveCfg = Debug
+		{FCB627FF-6B2B-4A9E-8765-0C9094316892}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B539383A-9D11-4051-AB00-BBEA4387E6CB}
+	EndGlobalSection
+EndGlobal
