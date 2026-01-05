@@ -17,6 +17,7 @@ using System.Text;
 using ScintillaNET;
 using System.Drawing;
 using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace UpdateTool
 {
@@ -73,14 +74,18 @@ namespace UpdateTool
         {
             clsDataProvider.CreateSqlConnection((comboBox1.SelectedItem as ObjConnect).value.ToString());
         }
-        private void LoadListFileName(string[] files, ref bool sqlbutton, ref bool Formbutton, string path)
+        private void LoadListFileName(string[] files, ref bool sqlbutton, ref bool Formbutton, string path, ref bool Reportbutton)
         {
             int index = 0;
             foreach (var file in files)
             {
                 System.IO.FileInfo oFileInfo = new System.IO.FileInfo(file);
 
-                if (!oFileInfo.Extension.Contains(".sql") && !oFileInfo.Extension.Contains(".txt") && !oFileInfo.Extension.Contains(".gz"))
+                if (!oFileInfo.Extension.Contains(".sql") && !oFileInfo.Extension.Contains(".txt") 
+                    && !oFileInfo.Extension.Contains(".gz") 
+                    && !oFileInfo.Extension.Contains(".rdl")
+                    && !oFileInfo.Extension.Contains(".rdlx")
+                    && !oFileInfo.Extension.Contains(".rdlc"))
                     continue;
 
                 list.Add(new UpdateTool.Model.FileInfo(index, oFileInfo.Name, oFileInfo.CreationTime, oFileInfo.FullName));
@@ -89,6 +94,8 @@ namespace UpdateTool
                     sqlbutton = true;
                 if (oFileInfo.Extension.Contains(".gz"))
                     Formbutton = true;
+                if (oFileInfo.Extension.Contains(".rdl"))
+                    Reportbutton = true;
             }
             //indexSearch = new Index(indexFolder,true);
             //indexSearch.Add(path);
@@ -99,6 +106,7 @@ namespace UpdateTool
             scintilla1.Text = string.Empty;
             bool sqlbutton = false;
             bool Formbutton = false;
+            bool Reportbutton = false;
 
             FolderBrowserDialog fdBrowser = new FolderBrowserDialog();
             if (fdBrowser.ShowDialog() == DialogResult.OK)
@@ -126,12 +134,13 @@ namespace UpdateTool
                 if (files.Count() > 0)
                 {
                     list.Clear();
-                    LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text);
+                    LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text, ref Reportbutton);
                     gridControl1.DataSource = list;
                 }
                 gridControl1.DataSource = list;
                 simpleButton3.Enabled = sqlbutton;
                 simpleButton4.Enabled = Formbutton;
+                simpleButton6.Enabled = Reportbutton;
             }
             
         }
@@ -152,12 +161,6 @@ namespace UpdateTool
                 backgroundWorker1.RunWorkerAsync(gridView1.GetSelectedRows().Count());
         }
 
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             stopWatch.Start();
@@ -165,7 +168,7 @@ namespace UpdateTool
             int result = 0;
             var list = gridView1.GetSelectedRows();
 
-            string log_fail = Path.Combine(textEdit1.Text, string.Format("FAIL_{0}", Key), "LOG.txt");
+            string log_fail = Path.Combine(textEdit1.Text, string.Format("{0}_{1}.{2}",Key ,"LOG",".txt"));
             System.IO.FileInfo fi = new System.IO.FileInfo(log_fail);
             if (fi.Exists)
                 fi.Delete();
@@ -185,7 +188,7 @@ namespace UpdateTool
                     Invoke((MethodInvoker)delegate {
                         gridView1.SetRowCellValue(i, "TRANGTHAI", "Sussces");
                         gridView1.SetRowCellValue(i, "MESS", mess);
-                        scintilla1.Text += "Đã chạy file [" + filename + "] ... " + "\r\n";
+                        scintilla1.Text += "--Đã chạy file [" + filename + "] ... " + "\r\n";
                     });
 
                     //string foldername = string.Format("SUCCESS_{0}", Key);
@@ -195,10 +198,10 @@ namespace UpdateTool
                 }
                 else
                 {
-                    string foldername = string.Format("FAIL_{0}", Key);
-                    bool exists = System.IO.Directory.Exists(Path.Combine(textEdit1.Text, foldername));
-                    if (!exists) { System.IO.Directory.CreateDirectory(Path.Combine(textEdit1.Text, foldername)); }
-                    System.IO.File.Copy(path, Path.Combine(textEdit1.Text, foldername + @"\" + filename), true);
+                    //string foldername = string.Format("FAIL_{0}", Key);
+                    //bool exists = System.IO.Directory.Exists(Path.Combine(textEdit1.Text, foldername));
+                    //if (!exists) { System.IO.Directory.CreateDirectory(Path.Combine(textEdit1.Text, foldername)); }
+                    //System.IO.File.Copy(path, Path.Combine(textEdit1.Text, foldername + @"\" + filename), true);
 
                     using (var sw = new StreamWriter(log_fail, true))
                     {
@@ -213,7 +216,7 @@ namespace UpdateTool
                     Invoke((MethodInvoker)delegate {
                         gridView1.SetRowCellValue(i, "TRANGTHAI", "Fail");
                         gridView1.SetRowCellValue(i, "MESS", mess);
-                        scintilla1.Text += "Đã chạy file [" + filename + "] ... " + "\r\n";
+                        scintilla1.Text += "--Đã chạy file [" + filename + "] ... " + "\r\n";
                     });
                 }
                 result++;
@@ -308,7 +311,7 @@ namespace UpdateTool
             var a = server.Where(x => !string.IsNullOrWhiteSpace(x.TEXT)).ToList();
             foreach (var item in a)
             {
-                ObjConnect obj = new ObjConnect(item.KEY, item.TEXT, item.VALUE, item.BENHVIEN_ID);
+                ObjConnect obj = new ObjConnect(item.KEY, item.TEXT, item.VALUE, item.BENHVIEN_ID,item.REPORT_PATH);
                 _HISConnects.Add(obj);
                 if (item.TEXT.Contains("PRO"))
                 {
@@ -400,18 +403,21 @@ namespace UpdateTool
             {
 
                 this.scintilla1.Text = string.Empty;
-
+                this.progressBar1.Value = 0;
                 if (this.backgroundWorker3.IsBusy)
                     return;
 
-                this.backgroundWorker3.RunWorkerAsync();
+                this.backgroundWorker3.RunWorkerAsync(MuiltiSite.Count());
             }
         }
 
         private void backgroundWorker3_DoWork(object sender, DoWorkEventArgs e)
         {
+            int max = (int)e.Argument;
+            int result = 0;
             foreach (var item in MuiltiSite)
             {
+                int progressPercentage = Convert.ToInt32(((double)result / max) * 100);
                 var list = gridView1.GetSelectedRows();
                 foreach (var i in list)
                 {
@@ -421,13 +427,11 @@ namespace UpdateTool
                     });
                 }
            
-
-                ClearColumn();
                 string ConnectionString = item.value;
                 clsDataProvider.CreateSqlConnection(ConnectionString);
 
                 Invoke((MethodInvoker)delegate {
-                    scintilla1.Text += "Start update site  " + item.display + "\r\n";
+                    scintilla1.Text += "--Start update site  " + item.display + "\r\n";
                 });
 
                 
@@ -436,17 +440,17 @@ namespace UpdateTool
                     string filename = gridView1.GetRowCellValue(i, "NAME").ToString();
                     string path = gridView1.GetRowCellValue(i, "path").ToString();
 
-                    UpForm(i, filename, path);
+                    UpForm(i, filename, path, item.Benhvien_id);
                 }
+                result++;
+                (sender as BackgroundWorker).ReportProgress(progressPercentage, result);
             }
             Invoke((MethodInvoker)delegate {
-                scintilla1.Text += "DONE........ "+ "\r\n";
+                scintilla1.Text += "--DONE........ "+ "\r\n";
             });
+            e.Result = result;
         }
-        private void ClearColumn()
-        {
-            
-        }
+
         private void backgroundWorker2_DoWork(object sender, DoWorkEventArgs e)
         {
             int max = (int)e.Argument;
@@ -468,8 +472,9 @@ namespace UpdateTool
             e.Result = result;
         } 
 
-        private void UpForm(int i,string filename, string path)
+        private void UpForm(int i,string filename, string path, string BENHVIEN_ID = "")
         {
+            BENHVIEN_ID = BENHVIEN_ID == string.Empty ? MABENHVIEN : BENHVIEN_ID;
             List<Dictionary<string, object>> items = null;
 
             System.IO.FileInfo fileToDecompress = new System.IO.FileInfo(path);
@@ -485,7 +490,7 @@ namespace UpdateTool
                         string page = Path.GetFileNameWithoutExtension(fileToDecompress.FullName);
                         Dictionary<string, object> parameters1 = new Dictionary<string, object>();
                         parameters1["PAGE"] = page;
-                        parameters1["HOSPITAL"] = MABENHVIEN;
+                        parameters1["HOSPITAL"] = BENHVIEN_ID;
                         clsDataProvider.ExcuteQuery("DELETE FROM TM_SYS_SCREEN WHERE PAGE=@PAGE and TM_SYS_SCREEN.HOSPITAL_ID=@HOSPITAL", parameters1);
 
                         items = Decompress(fileToDecompress);
@@ -495,7 +500,7 @@ namespace UpdateTool
                         {
                             string str1 = string.Format("{0}{1:000}", (object)page, (object)num1);
                             dictionary["Id"] = (object)str1;
-                            dictionary["HOSPITAL_ID"] = MABENHVIEN;
+                            dictionary["HOSPITAL_ID"] = BENHVIEN_ID;
                             dictionary["Locale"] = "vi-vn";
                             if (!dictionary.ContainsKey("TextAlign"))
                                 dictionary.Add("TextAlign", (object)0);
@@ -533,7 +538,7 @@ namespace UpdateTool
                         Invoke((MethodInvoker)delegate {
                             gridView1.SetRowCellValue(i, "TRANGTHAI", "Sussces");
                             gridView1.SetRowCellValue(i, "MESS", string.Format("Time {0}", elapsedTime));
-                            scintilla1.Text += "Đã chạy file [" + filename + "] ... " + "\r\n";
+                            scintilla1.Text += "--Đã chạy file [" + filename + "] ... " + "\r\n";
                         });
 
                     }
@@ -644,6 +649,8 @@ namespace UpdateTool
                     return "X";
                 case "Y":
                     return "Y";
+				case "BorderStyle":
+                    return "BORDERSTYLE";	
                 default:
                     return string.Empty;
             }
@@ -686,6 +693,7 @@ namespace UpdateTool
             }
             bool sqlbutton = false;
             bool Formbutton = false;
+            bool Reportbutton = false;
             if (!System.IO.Directory.Exists(textEdit1.Text))
             {
                 gridControl1.DataSource = null;
@@ -712,12 +720,12 @@ namespace UpdateTool
 
             if (files.Count() > 0)
             {
-                LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text);
+                LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text, ref Reportbutton);
                 gridControl1.DataSource = list;
             }
             simpleButton3.Enabled = sqlbutton;
             simpleButton4.Enabled = Formbutton;
-
+            simpleButton6.Enabled = Reportbutton;
         }
 
         private void simpleButton5_Click(object sender, EventArgs e)
@@ -768,17 +776,17 @@ namespace UpdateTool
                 scintilla1.Text = string.Empty;
                 bool sqlbutton = false;
                 bool Formbutton = false;
-
+                bool Reportbutton = false;
                 var resultItems = UpdateTool.Class.Helper.SearchInDB(term, "INDEXSEARCH", textEdit1.Text);
                 string[] files = resultItems.Select(x => x.Path).ToArray<string>();
 
-                LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text);
+                LoadListFileName(files, ref sqlbutton, ref Formbutton, textEdit1.Text, ref Reportbutton);
                 gridControl1.DataSource = list;
 
 
                 simpleButton3.Enabled = sqlbutton;
                 simpleButton4.Enabled = Formbutton;
-
+                simpleButton6.Enabled = Reportbutton;
                 e.SuppressKeyPress = true;
             }
         }
@@ -801,6 +809,123 @@ namespace UpdateTool
                 comboBox1.Enabled = true;
 
             }
+        }
+
+        private void backgroundWorker3_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void backgroundWorker3_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBar1.Value = progressBar1.Maximum;
+        }
+
+        private void simpleButton6_Click(object sender, EventArgs e)
+        {
+            scintilla1.Text = string.Empty;
+            Thread t = new Thread(() => {
+
+                if (checkEdit2.Checked)
+                {
+                    MuiltiSite.Clear();
+                    StringBuilder mess = new StringBuilder();
+
+                    var itemsPRO = checkedListBoxControl1.CheckedItems.Cast<ObjConnect>();
+                    var itemsSTA = checkedListBoxControl2.CheckedItems.Cast<ObjConnect>();
+
+
+                    if (itemsPRO.Count() + itemsSTA.Count() <= 0) { return; }
+
+                    mess.AppendLine("Xác nhận update các site: ");
+                    foreach (var item in itemsPRO)
+                    {
+                        mess.AppendLine(string.Format("   + {0}", item.display));
+                        MuiltiSite.Add(item);
+                    }
+                    foreach (var item in itemsSTA)
+                    {
+                        mess.AppendLine(string.Format("   + {0}", item.display));
+                        MuiltiSite.Add(item);
+                    }
+
+                    DialogResult dr = MessageBox.Show(mess.ToString(), "XÁC NHẬN", MessageBoxButtons.YesNo);
+
+                    if (dr == DialogResult.No) { return; }
+                    if (dr == DialogResult.Yes)
+                    {
+                        foreach (var item in MuiltiSite)
+                        {
+                            Invoke((MethodInvoker)delegate {
+                                scintilla1.Text += string.Format("-----------------------------START site: {0}\n", item.display);
+                            });
+
+
+                            string pathDest = item.REPORT_PATH;
+                            if (string.IsNullOrEmpty(pathDest))
+                            {
+                                Invoke((MethodInvoker)delegate {
+                                    scintilla1.Text += string.Format("Chưa cấu hình folder đích");
+                                });
+                                continue;
+                            }
+                            try
+                            {
+                                foreach (var file in Directory.GetFiles(textEdit1.Text))
+                                {
+                                    System.IO.File.Copy(file, Path.Combine(pathDest, Path.GetFileName(file)), true);
+                                    Invoke((MethodInvoker)delegate {
+                                        scintilla1.Text += string.Format("Copy file: {0}\n",Path.GetFileName(file));
+                                    });
+                                }
+
+                                Invoke((MethodInvoker)delegate {
+                                    scintilla1.Text += string.Format("--Copy done {0} file to: {1}\n", Directory.GetFiles(textEdit1.Text).Count(), pathDest);
+                                    scintilla1.Text += string.Format("-----------------------------END site: {0}\n\r", item.display);
+                                });
+                                
+                            }
+                            catch (Exception ex)
+                            {
+                                Invoke((MethodInvoker)delegate {
+                                    scintilla1.Text += string.Format(ex.Message);
+                                });
+
+                                continue;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    string pathDest = (comboBox1.SelectedItem as ObjConnect).REPORT_PATH.ToString();
+                    if (string.IsNullOrEmpty(pathDest))
+                    {
+                        MessageBox.Show("Chưa cấu hình folder đích");
+                        return;
+                    }
+                    string mess = string.Format("Copy {0} File đến \n{1} \nnhé!", Directory.GetFiles(textEdit1.Text).Count(), pathDest);
+                    DialogResult dr = MessageBox.Show(mess.ToString(), "XÁC NHẬN", MessageBoxButtons.YesNo);
+
+                    if (dr == DialogResult.No) { return; }
+                    if (dr == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            foreach (var file in Directory.GetFiles(textEdit1.Text))
+                                System.IO.File.Copy(file, Path.Combine(pathDest, Path.GetFileName(file)), true);
+                            MessageBox.Show("DONE");
+                        }
+                        catch (IOException iox)
+                        {
+                            MessageBox.Show(iox.Message);
+                            return;
+                        }
+
+                    }
+                }
+            });
+            t.Start();
         }
     }
 }

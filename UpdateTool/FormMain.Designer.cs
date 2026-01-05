@@ -37,6 +37,7 @@ namespace UpdateTool
             DevExpress.XtraEditors.FormatConditionRuleContains formatConditionRuleContains2 = new DevExpress.XtraEditors.FormatConditionRuleContains();
             this.TRANGTHAI = new DevExpress.XtraGrid.Columns.GridColumn();
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.simpleButton6 = new DevExpress.XtraEditors.SimpleButton();
             this.checkEdit2 = new DevExpress.XtraEditors.CheckEdit();
             this.checkEdit1 = new DevExpress.XtraEditors.CheckEdit();
             this.textEdit2 = new DevExpress.XtraEditors.TextEdit();
@@ -100,6 +101,7 @@ namespace UpdateTool
             // 
             this.groupControl1.CaptionImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("groupControl1.CaptionImageOptions.Image")));
             this.groupControl1.CaptionLocation = DevExpress.Utils.Locations.Top;
+            this.groupControl1.Controls.Add(this.simpleButton6);
             this.groupControl1.Controls.Add(this.checkEdit2);
             this.groupControl1.Controls.Add(this.checkEdit1);
             this.groupControl1.Controls.Add(this.textEdit2);
@@ -115,9 +117,18 @@ namespace UpdateTool
             this.groupControl1.GroupStyle = DevExpress.Utils.GroupStyle.Light;
             this.groupControl1.Location = new System.Drawing.Point(0, 0);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(1222, 53);
+            this.groupControl1.Size = new System.Drawing.Size(1281, 53);
             this.groupControl1.TabIndex = 1;
             this.groupControl1.Text = "Connect";
+            // 
+            // simpleButton6
+            // 
+            this.simpleButton6.Location = new System.Drawing.Point(895, 22);
+            this.simpleButton6.Name = "simpleButton6";
+            this.simpleButton6.Size = new System.Drawing.Size(57, 23);
+            this.simpleButton6.TabIndex = 13;
+            this.simpleButton6.Text = "Up Report";
+            this.simpleButton6.Click += new System.EventHandler(this.simpleButton6_Click);
             // 
             // checkEdit2
             // 
@@ -130,7 +141,7 @@ namespace UpdateTool
             // 
             // checkEdit1
             // 
-            this.checkEdit1.Location = new System.Drawing.Point(898, 24);
+            this.checkEdit1.Location = new System.Drawing.Point(952, 24);
             this.checkEdit1.Name = "checkEdit1";
             this.checkEdit1.Properties.Caption = "Seach";
             this.checkEdit1.Size = new System.Drawing.Size(55, 20);
@@ -143,9 +154,9 @@ namespace UpdateTool
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textEdit2.EditValue = "";
             this.textEdit2.Enabled = false;
-            this.textEdit2.Location = new System.Drawing.Point(962, 24);
+            this.textEdit2.Location = new System.Drawing.Point(1009, 24);
             this.textEdit2.Name = "textEdit2";
-            this.textEdit2.Size = new System.Drawing.Size(199, 20);
+            this.textEdit2.Size = new System.Drawing.Size(211, 20);
             this.textEdit2.TabIndex = 10;
             this.textEdit2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textEdit2_KeyDown);
             // 
@@ -153,7 +164,7 @@ namespace UpdateTool
             // 
             this.panel4.Controls.Add(this.simpleButton5);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel4.Location = new System.Drawing.Point(1167, 23);
+            this.panel4.Location = new System.Drawing.Point(1226, 23);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(53, 28);
             this.panel4.TabIndex = 9;
@@ -247,9 +258,8 @@ namespace UpdateTool
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 53);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1222, 671);
+            this.panel1.Size = new System.Drawing.Size(1281, 671);
             this.panel1.TabIndex = 4;
-            this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
             // scintilla1
             // 
@@ -257,7 +267,7 @@ namespace UpdateTool
             this.scintilla1.Lexer = ScintillaNET.Lexer.Sql;
             this.scintilla1.Location = new System.Drawing.Point(736, 0);
             this.scintilla1.Name = "scintilla1";
-            this.scintilla1.Size = new System.Drawing.Size(486, 671);
+            this.scintilla1.Size = new System.Drawing.Size(545, 671);
             this.scintilla1.TabIndex = 10;
             this.scintilla1.WrapMode = ScintillaNET.WrapMode.Word;
             // 
@@ -443,13 +453,16 @@ namespace UpdateTool
             // 
             // backgroundWorker3
             // 
+            this.backgroundWorker3.WorkerReportsProgress = true;
             this.backgroundWorker3.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker3_DoWork);
+            this.backgroundWorker3.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker3_ProgressChanged);
+            this.backgroundWorker3.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker3_RunWorkerCompleted);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1222, 724);
+            this.ClientSize = new System.Drawing.Size(1281, 724);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupControl1);
             this.IconOptions.Image = global::UpdateTool.Properties.Resources.icon;
@@ -509,6 +522,7 @@ namespace UpdateTool
         private DevExpress.XtraEditors.CheckedListBoxControl checkedListBoxControl1;
         private DevExpress.XtraEditors.CheckEdit checkEdit2;
         private System.ComponentModel.BackgroundWorker backgroundWorker3;
+        private DevExpress.XtraEditors.SimpleButton simpleButton6;
     }
 }
 

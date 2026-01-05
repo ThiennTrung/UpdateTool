@@ -7,13 +7,14 @@
 
         public string Benhvien_id { get; set; }
         public string value { get; set; }
-
-        public ObjConnect(string code,string display,string value = null, string Benhvien_id = null )
+        public string REPORT_PATH { get; set; }
+        public ObjConnect(string code,string display,string value = null, string Benhvien_id = null,string FolderPath = null)
         {
             this.code = code;
             this.display = display;
             this.value = value;
             this.Benhvien_id = Benhvien_id;
+            this.REPORT_PATH = FolderPath;
         }
     }
 }

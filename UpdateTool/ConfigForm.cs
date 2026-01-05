@@ -78,6 +78,12 @@ namespace UpdateTool
             get => (string)this[nameof(TEXT)];
             set => this[nameof(TEXT)] = (object)value;
         }
+        [ConfigurationProperty("REPORT_PATH", IsRequired = false)]
+        public string REPORT_PATH
+        {
+            get => (string)this[nameof(REPORT_PATH)];
+            set => this[nameof(REPORT_PATH)] = (object)value;
+        }
     }
     public class HospitalSettings : ConfigurationSection
     {
