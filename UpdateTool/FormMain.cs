@@ -491,7 +491,7 @@ namespace UpdateTool
                         Dictionary<string, object> parameters1 = new Dictionary<string, object>();
                         parameters1["PAGE"] = page;
                         parameters1["HOSPITAL"] = BENHVIEN_ID;
-                        clsDataProvider.ExcuteQuery("DELETE FROM TM_SYS_SCREEN WHERE PAGE=@PAGE and TM_SYS_SCREEN.HOSPITAL_ID=@HOSPITAL", parameters1);
+                        clsDataProvider.ExcuteQuery("DELETE FROM TM_SYS_SCREEN WHERE PAGE=@PAGE and TM_SYS_SCREEN.HOSPITAL_ID=@HOSPITAL AND LOCALE = 'vi-vn'", parameters1);
 
                         items = Decompress(fileToDecompress);
                         items.RemoveAt(0);
